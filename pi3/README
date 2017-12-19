@@ -1,0 +1,46 @@
+sudo raspi-config
+# change display, locale, time zone, enable ssh, enable vnc, force audio to 3.5mm
+
+sudo apt-get update -yq
+sudo apt-get upgrade -yq
+
+sudo reboot
+
+append bashrc to .bashrc
+
+sudo apt-get install -yq vim samba
+sudo smbpasswd -a pi
+
+sudo cp /etc/samba/smb.conf /etc/samba/orig.smb.conf
+replace /etc/samba/smb.conf with ./smb.conf
+
+sudo systemctl restart smbd
+
+sudo apt-get install -yq python-virtualenv
+
+mkdir code
+
+cd code
+
+git clone https://github.com/mikepartelow/sonos.git
+
+cd sonos && virtualenv venv
+
+source venv/bin/activate
+
+ pip install -r requirements.txt
+
+mkdir /home/pi/sonos-queue
+
+crontab -e
+
+/home/pi/code/sonos/venv/bin/python /home/pi/code/sonos/sonos.py dump-queue /home/pi/sonos-queue
+
+
+
+ssh-keygen
+cat ~/.ssh/id_rsa.pub
+[ add to pi@raspberrypi.local authorized_keys ]
+
+crontab -e
+/usr/bin/rsync -av /home/pi/sonos-queue pi@raspberrypi.local:/home/pi/
